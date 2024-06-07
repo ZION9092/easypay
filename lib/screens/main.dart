@@ -1,3 +1,4 @@
+import 'package:easypay/Onboarding/onboarding_screen.dart';
 import 'package:easypay/mainpage.dart';
 import 'package:easypay/screens/forgotpassword.dart';
 import 'package:easypay/screens/registrationpage.dart';
@@ -23,10 +24,19 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const Mainpage(),
+      initialRoute: '/',
+      getPages: [
+        GetPage(name: '/', page: () => OnboardingScreen()),
+        GetPage(name: '/login', page: () => LoginPage(showRegisterPage: () {})),
+        GetPage(name: '/register', page: () => RegisterPage(showLoginPage: () {})),
+        GetPage(name: '/forgotpassword', page: () => Forgotpassword()),
+        GetPage(name: '/home', page: () => MainPage(user: Get.arguments,)), // Add the home screen route
+        // Add other pages here
+      ],
     );
   }
 }
+
 
 class LoginController extends GetxController {
   var email = ''.obs;
@@ -46,12 +56,13 @@ class LoginController extends GetxController {
     try {
       if (email.value.isNotEmpty && password.value.isNotEmpty) {
         isLoading(true);
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
+        UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: email.value,
           password: password.value,
         );
         isLoading(false);
-        // Navigate to the home page or update the authentication state
+        // Navigate to the home page
+         Get.offAllNamed('/home', arguments: userCredential.user);
         Get.snackbar('Success', 'Logged in successfully',
             snackPosition: SnackPosition.BOTTOM);
       } else {
